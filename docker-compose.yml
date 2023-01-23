@@ -1,0 +1,63 @@
+services:
+  db:
+    container_name: serv_postgres
+    hostname: serv_postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpwd
+      POSTGRES_DB: cabinet_recrutement_db
+    ports:
+      - "5432:5432"
+    networks:
+      vnet_filrouge:
+        ipv4_address: 10.5.0.8
+    volumes:
+      - ./Data/creation_base_recrutement.sql:/docker-entrypoint-initdb.d/creation_base_recrutement.sql
+  
+  pgadmin:
+    container_name: pgadmin4
+    hostname: pgadmin4_serv
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pguser@admin.com
+      PGADMIN_DEFAULT_PASSWORD: pgpwd
+    ports:
+      - "5050:80"
+    networks:
+      vnet_filrouge:
+        ipv4_address: 10.5.0.7
+    volumes: 
+      - ./Data/servers.json:/pgadmin4/servers.json
+      - ./Data/pass:/pgadmin4/pgpass
+    depends_on:
+      - "db"
+
+  wildfly:
+    container_name: servapp_wildfly
+    image: servapp_wildfly
+    hostname: wildfly_serv
+    build:
+      context: .
+      dockerfile: servapp/Dockerfile
+    ports:
+      - "8080:8080"
+      - "9990:9990"
+    networks:
+      vnet_filrouge:
+        ipv4_address: 10.5.0.6
+   
+  
+  backend:
+    image: envdev_inf211
+    build:
+      context: .
+      dockerfile: dev/Dockerfile
+
+networks:
+  vnet_filrouge:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
