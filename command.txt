@@ -1,0 +1,3 @@
+docker run --network=filrouge_vnet_filrouge --ip 10.5.0.9 -it --mount type=bind,source=$(pwd)/dev/cabinet_recrutement/,target=/app envdev_inf211 /bin/bash
+mvn hibernate-tools:hbm2java
+mvn hibernate-tools:hbm2dao
